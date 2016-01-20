@@ -1,0 +1,9 @@
+name = UUID Menu Links
+description = Provides export functionality for menu links.
+package = UUID
+core = 7.x
+dependencies[] = uuid
+
+testing_api = 2.x
+files[] = tests/uuid_menu_links.test
+

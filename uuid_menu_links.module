@@ -1,0 +1,49 @@
+<?php
+/**
+* @file
+* A description of what your module does.
+*/
+
+/**
+ * Implements hook_menu_link_insert().
+ */
+function uuid_menu_links_menu_link_insert($item) {
+  db_update('menu_links')
+    ->fields(array('uuid' => uuid_generate()))
+    ->condition('mlid', $item['mlid'])
+    ->execute();
+}
+
+/**
+ * Implements hook_menu_link_alter().
+ */
+function uuid_menu_links_menu_link_alter(&$item) {
+  $item['options']['alter'] = TRUE;
+}
+
+/**
+ * Implements hook_translated_menu_link_alter().
+ */
+function uuid_menu_links_translated_menu_link_alter(&$item, $map) {
+  $result = db_select('menu_links', 'ml')
+    ->fields('ml', array('uuid'))
+    ->condition('mlid', $item['mlid'])
+    ->execute()
+    ->fetchAssoc();
+
+  $item['uuid'] = $result['uuid'];
+}
+
+/**
+ * Load a menu link by a uuid.
+ */
+function uuid_menu_links_load_by_uuid($uuid) {
+  $item = db_select('menu_links', 'ml')
+    ->fields('ml', array('mlid'))
+    ->condition('uuid', $uuid)
+    ->execute()
+    ->fetchAssoc();
+
+  return isset($item['mlid']) ? menu_link_load($item['mlid']) : FALSE;
+}
+

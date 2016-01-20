@@ -1,0 +1,30 @@
+<?php
+/**
+ * @file
+ * Install, uninstall and update hooks for the uuid menu links module.
+ */
+
+/**
+ * Implements hook_schema_alter().
+ */
+function uuid_menu_links_schema_alter(&$schema = array()) {
+  module_load_install('uuid');
+  $schema['menu_links']['fields']['uuid'] = uuid_schema_field_definition();
+}
+
+/**
+ * Implements hook_install().
+ */
+function uuid_menu_links_install() {
+  module_load_install('uuid');
+
+  db_add_field('menu_links', 'uuid', uuid_schema_field_definition());
+  _uuid_sync_table('menu_links', 'mlid', 'uuid');
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function uuid_menu_links_uninstall() {
+  db_drop_field('menu_links', 'uuid');
+}

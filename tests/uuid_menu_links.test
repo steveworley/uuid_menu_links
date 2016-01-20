@@ -1,0 +1,77 @@
+<?php
+
+/**
+ * @file
+ * Test coverage for uuid_menu_links.
+ */
+
+class UUIDMenuLinksTest extends DrupalWebTestCase {
+
+  /**
+   * Implements DrupalTestCase::getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Menu Links UUID'),
+      'description' => t('Executes test suite for the uuid menu links module.'),
+      'group' => t('UUID'),
+    );
+  }
+
+  /**
+   *
+   */
+  public function setUp($modules = array()) {
+    if (empty($modules)) {
+      $modules = array('menu', 'uuid', 'uuid_menu_links');
+    }
+    parent::setUp($modules);
+    return $modules;
+  }
+
+  protected static function getLink() {
+    return array(
+      'link_path' => '<front>',
+      'link_title' => 'Test Link',
+    );
+  }
+
+  /**
+   * Ensure that when a menu_link is saved a uuid is added.
+   */
+  public function testMenuLinkSave() {
+    $link = static::getLink();
+    $mlid = menu_link_save($link);
+    $item = menu_link_load($mlid);
+
+    $this->assertTrue(!empty($item['uuid']), 'Menu link saved with a uuid.');
+  }
+
+  /**
+   * Ensure that the UUID is available when a menu link is loaded.
+   */
+  public function testMenuLinkLoad() {
+    $mlid = db_select('menu_links', 'ml')
+      ->fields('ml', array('mlid'))
+      ->range(0, 1)
+      ->execute()
+      ->fetchCol();
+
+    $item = menu_link_load($mlid[0]);
+    $this->assertTrue(!empty($item['uuid']), 'Menu link has been loaded via uuid');
+  }
+
+  /**
+   * Ensure that a menu link can be loaded by a uuid.
+   */
+  public function testMenuLinkLoadByUUID() {
+    $link = static::getLink();
+    $mlid = menu_link_save($link);
+    $item = menu_link_load($mlid);
+
+    $item_uuid = uuid_menu_links_load_by_uuid($item['uuid']);
+
+    $this->assertTrue(!empty($item_uuid), 'Menu link was loaded via the uuid.');
+    $this->assertTrue($item['mlid'] == $item_uuid['mlid'], 'Menu link loaded the correct link.');
+  }
+}
